@@ -1,0 +1,11 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/auth/:path*",
+      "destination": "https://globifier-auth-be-dev.vercel.app/:path*"
+    }
+  ],
+  "git": {
+    "deploymentEnabled": false
+  }
+}

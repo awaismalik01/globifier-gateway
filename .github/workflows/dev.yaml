@@ -1,0 +1,23 @@
+name: Vercel Dev Deployment
+
+on:
+  push:
+    branches-ignore:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Use dev vercel.json
+        run: cp vercel.dev.json vercel.json
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      - name: Deploy to Vercel (Preview)
+        run: vercel --confirm --token ${{ secrets.VERCEL_TOKEN }}
