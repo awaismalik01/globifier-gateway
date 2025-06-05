@@ -6,6 +6,11 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+  actions: read
+  checks: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -15,6 +20,11 @@ jobs:
 
       - name: Use dev vercel.json
         run: cp vercel.dev.json vercel.json
+
+      - name: List files and verify vercel.json
+        run: |
+          ls -la vercel.*.json
+          cat vercel.json
 
       - name: Install Vercel CLI
         run: npm install -g vercel
