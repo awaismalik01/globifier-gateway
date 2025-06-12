@@ -1,12 +1,16 @@
 {
   "rewrites": [
     {
-      "source": "/api/auth/:path*",
-      "destination": "https://globifier-auth-be-dev.vercel.app/:path*"
+      "source": "/",
+      "destination": "https://globifier-auth-fe-dev.vercel.app/"
     },
     {
       "source": "/:path*",
       "destination": "https://globifier-auth-fe-dev.vercel.app/:path*"
+    },
+    {
+      "source": "/api/auth/:path*",
+      "destination": "https://globifier-auth-be-dev.vercel.app/:path*"
     }
   ],
   "git": {
