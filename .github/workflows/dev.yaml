@@ -24,7 +24,7 @@ jobs:
       - name: List files and verify vercel.json
         run: |
           ls -la vercel/vercel.*.json
-          cat vercel/vercel.json
+          cat vercel.json
 
       - name: Install Vercel CLI
         run: npm install -g vercel
