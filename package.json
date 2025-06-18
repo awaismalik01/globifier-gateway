@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "globifier-auth-fe": "cd ../globifier-auth-fe && npm run dev",
+    "globifier-auth-be": "cd ../globifier-auth-be && npm run start:dev",
+    "globifier-auth": "concurrently \"npm run globifier-auth-fe\" \"npm run globifier-auth-be\"",
+    "globifier": "cd vercel && vercel dev --yes --local-config vercel.local.json",
+    "start": "concurrently \"npm run globifier-auth\" \"npm run globifier\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "vercel": "^43.2.0"
+  }
+}

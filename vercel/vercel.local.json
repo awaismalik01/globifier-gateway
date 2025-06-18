@@ -1,0 +1,19 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/auth/:path*",
+      "destination": "http://localhost:8000/api/auth/:path*"
+    },
+    {
+      "source": "/",
+      "destination": "http://localhost:5173/"
+    },
+    {
+      "source": "/:path*",
+      "destination": "http://localhost:5173/:path*"
+    }
+  ],
+  "git": {
+    "deploymentEnabled": false
+  }
+}
