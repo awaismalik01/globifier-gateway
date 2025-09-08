@@ -19,7 +19,6 @@ export default function middleware(req: Request) {
     ?.split("=")[1];
 
   if (!token) {
-    // Block request if auth_token cookie is missing
     return new Response("Unauthorized", { status: 403 });
   }
 
