@@ -1,26 +1,33 @@
-import { rewrite } from "@vercel/functions";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 export const config = {
   matcher: ["/api/:path*"],
 };
 
-export default function middleware(req: Request) {
-  const url = new URL(req.url);
+export default function middleware(req: NextRequest) {
+  const url = req.nextUrl;
 
+  // Allow login route without token
   if (url.pathname === "/api/auth/login") {
-    return rewrite(new URL(req.url));
+    return NextResponse.next();
   }
 
-  const cookieHeader = req.headers.get("cookie") || "";
-  const token = cookieHeader
-    .split(";")
-    .map((c) => c.trim())
-    .find((c) => c.startsWith("auth_token="))
-    ?.split("=")[1];
+  // Read cookie
+  const token = req.cookies.get("auth_token")?.value;
 
   if (!token) {
-    return new Response("Unauthorized", { status: 403 });
+    return new NextResponse("Unauthorized", { status: 403 });
   }
 
-  return rewrite(new URL(req.url));
+  // Clone request and forward token as header
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set("Authorization", `Bearer ${token}`);
+
+  // Pass the modified request to the destination
+  return NextResponse.rewrite(url, {
+    request: {
+      headers: requestHeaders,
+    },
+  });
 }
