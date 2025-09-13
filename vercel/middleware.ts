@@ -7,22 +7,34 @@ export const config = {
 export default function middleware(req: Request) {
   const url = new URL(req.url);
 
+  const newHeaders = new Headers(req.headers);
+
+  const cookie =
+    req.headers
+      ?.get("cookie")
+      ?.split(";")
+      .map((c) => c.trim()) || [];
+
+  const filteredCookies = cookie
+    .filter((c) => !c.startsWith("auth_token="))
+    .join("; ");
+  newHeaders.set("cookie", filteredCookies);
+
   if (url.pathname === "/api/auth/login") {
-    return next();
+    return next({
+      request: { headers: newHeaders },
+    });
   }
 
-  const cookieHeader = req.headers.get("cookie") || "";
-  const token = cookieHeader
-    .split(";")
-    .map((c) => c.trim())
-    .find((c) => c.startsWith("auth_token="))
-    ?.split("=")[1];
+  const token = cookie.find((c) => c.startsWith("auth_token="))?.split("=")[1];
 
   if (!token) {
-    return new Response("Unauthorized", { status: 403 });
+    return new Response("Access Denied", { status: 403 });
   }
 
+  newHeaders.set("Authorization", `Bearer ${token}`);
+
   return next({
-    headers: { Authorization: `Bearer ${token}` },
+    request: { headers: newHeaders },
   });
 }
