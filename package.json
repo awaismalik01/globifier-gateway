@@ -10,6 +10,6 @@
     "vercel": "^43.2.0"
   },
   "dependencies": {
-    "next": "^15.5.3"
+    "@vercel/functions": "^3.0.0"
   }
 }
