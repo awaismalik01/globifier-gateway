@@ -7,6 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  id-token: write
   contents: read
   actions: read
   checks: write
@@ -21,9 +22,8 @@ jobs:
       - name: Fetch secrets from Infisical
         uses: Infisical/secrets-action@v1.0.16
         with:
-          method: universal
-          client-id: ${{ secrets.INFISICAL_CLIENT_ID }}
-          client-secret: ${{ secrets.INFISICAL_CLIENT_SECRET }}
+          method: oidc
+          identity-id: ${{ secrets.INFISICAL_MACHINE_ID }}
           project-slug: ${{ secrets.INFISICAL_PROJECT_SLUG }}
           env-slug: "dev"
           secret-path: "/"
@@ -35,4 +35,7 @@ jobs:
         run: npm install -g vercel
 
       - name: Deploy to Vercel (Preview)
-        run: vercel --confirm --token ${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: vercel deploy --confirm --token ${{ secrets.VERCEL_TOKEN }}
