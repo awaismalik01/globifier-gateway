@@ -31,6 +31,18 @@ jobs:
       - name: Resolve env vars in vercel.json
         run: envsubst '${GLOBIFIER_AUTH_BE_URL} ${GLOBIFIER_AUTH_FE_URL}' < vercel.json > vercel.resolved.json && mv vercel.resolved.json vercel.json
 
+      - name: Sync Infisical secrets to Vercel
+        uses: awaismalik01/github-actions/vercel-infisical-vault-sync@v1
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-team-id: ${{ secrets.VERCEL_ORG_ID }}
+          target: preview
+          infisical-method: oidc
+          infisical-identity-id: ${{ secrets.INFISICAL_MACHINE_ID }}
+          infisical-project-slug: ${{ secrets.INFISICAL_PROJECT_SLUG }}
+          infisical-env-slug: "dev"
+
       - name: Install Vercel CLI
         run: npm install -g vercel
 
