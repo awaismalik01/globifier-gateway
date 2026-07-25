@@ -19,35 +19,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
 
-      - name: Fetch secrets from Infisical
-        uses: Infisical/secrets-action@v1.0.16
+      - uses: awaismalik01/github-actions/gateway-vercel-deploy@v1
         with:
-          method: oidc
-          identity-id: ${{ secrets.INFISICAL_MACHINE_ID }}
-          project-slug: ${{ secrets.INFISICAL_PROJECT_SLUG }}
-          env-slug: "dev"
-          secret-path: "/"
-
-      - name: Resolve env vars in vercel.json
-        run: envsubst '${GLOBIFIER_AUTH_BE_URL} ${GLOBIFIER_AUTH_FE_URL}' < vercel.json > vercel.resolved.json && mv vercel.resolved.json vercel.json
-
-      - name: Sync Infisical secrets to Vercel
-        uses: awaismalik01/github-actions/vercel-infisical-vault-sync@v1
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-team-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel_project_id: ${{ secrets.VERCEL_PROJECT_ID }}
           target: preview
-          infisical-method: oidc
-          infisical-identity-id: ${{ secrets.INFISICAL_MACHINE_ID }}
-          infisical-project-slug: ${{ secrets.INFISICAL_PROJECT_SLUG }}
-          infisical-env-slug: "dev"
-
-      - name: Install Vercel CLI
-        run: npm install -g vercel
-
-      - name: Deploy to Vercel (Preview)
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: vercel deploy --confirm --token ${{ secrets.VERCEL_TOKEN }}
+          infisical_identity_id: ${{ secrets.INFISICAL_MACHINE_ID }}
+          infisical_project_slug: ${{ secrets.INFISICAL_PROJECT_SLUG }}
+          infisical_env_slug: "dev"
