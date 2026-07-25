@@ -1,0 +1,19 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/auth/:path*",
+      "destination": "${GLOBIFIER_AUTH_BE_URL}/api/auth/:path*"
+    },
+    {
+      "source": "/",
+      "destination": "${GLOBIFIER_AUTH_FE_URL}/"
+    },
+    {
+      "source": "/:path*",
+      "destination": "${GLOBIFIER_AUTH_FE_URL}/:path*"
+    }
+  ],
+  "git": {
+    "deploymentEnabled": false
+  }
+}
