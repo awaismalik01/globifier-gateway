@@ -13,7 +13,7 @@ The gateway sits in front of these services:
 | Project | Role | Local Port |
 |---------|------|------------|
 | `globifier-gateway` | Vercel edge gateway / reverse proxy | 3000 (vercel dev) |
-| `globifier-auth-be` | NestJS auth + user API | 8000 |
+| `globifier-auth-be` | NestJS auth + user API | 8080 |
 | `globifier-auth-fe` | Frontend (Vite/React, separate repo) | 5173 |
 
 ## Repository Structure
@@ -23,11 +23,13 @@ globifier-gateway/
 ├── .github/
 │   └── workflows/
 │       └── dev.yaml            # CI/CD — fetches Infisical secrets, resolves vercel.json, deploys
+├── middleware.ts               # Vercel edge middleware — auth enforcement on /api/*
 ├── vercel.json                 # Routing config template — uses ${VAR} placeholders for URLs
 ├── vercel/
-│   ├── middleware.ts           # Vercel edge middleware — auth enforcement on /api/*
+│   ├── .env.local              # Local environment variables (git-ignored)
+│   ├── .gitignore              # Ignores local-only vercel files
 │   └── vercel.local.json       # Local dev config — hardcoded localhost URLs
-├── package.json                # Local dev dependency (vercel CLI) and start script
+├── package.json                # Dev dependency (vercel CLI), runtime dep (@vercel/functions), start script
 └── .gitignore
 ```
 
@@ -47,9 +49,11 @@ Defined in `vercel.json` (deployed environments) and `vercel/vercel.local.json` 
 
 `vercel/vercel.local.json` uses hardcoded `localhost` URLs for local development.
 
-## Edge Middleware (`vercel/middleware.ts`)
+Both config files set `"framework": null` and `"buildCommand": ""` to signal that no build step exists.
 
-Runs on every `/api/*` request at the edge before it is proxied.
+## Edge Middleware (`middleware.ts`)
+
+Located at the **project root** (required by Vercel's middleware convention). Runs on every `/api/*` request at the edge before it is proxied.
 
 Key behaviour:
 - **Strips** the `auth_token` cookie from all outgoing upstream requests — the upstream never sees it raw.
@@ -61,6 +65,7 @@ When editing middleware:
 - Keep the `auth_token` cookie stripping logic intact.
 - The `config.matcher` array controls which paths the middleware activates on; keep it scoped to `/api/:path*`.
 - Return `new Response("...", { status: ... })` for early exits; use `next({ request: { headers } })` to continue.
+- Import `next` from `@vercel/functions`.
 
 ## Local Development
 
@@ -69,7 +74,7 @@ When editing middleware:
 npm start
 ```
 
-This runs `vercel dev` with `vercel/vercel.local.json` which routes to `localhost:8000` (auth-be) and `localhost:5173` (auth-fe). Start those services separately in their own repos.
+This runs `vercel dev` with `vercel/vercel.local.json` which routes to `localhost:8080` (auth-be) and `localhost:5173` (auth-fe). Start those services separately in their own repos.
 
 ## CI/CD (`.github/workflows/dev.yaml`)
 
@@ -104,10 +109,12 @@ Steps:
 - This project is **not** a NestJS or Express app — no server-side runtime beyond Vercel edge functions.
 - Do not add runtime Node.js dependencies unless they are edge-runtime compatible (`@vercel/functions` is the approved runtime package).
 - Middleware must remain a **default export** function with a named `config` export for the matcher.
+- Middleware lives at the **project root** (`middleware.ts`) — not inside `vercel/`.
 - When adding a new backend service, add its `/api/<service>/:path*` rewrite **before** the catch-all `/:path*` rewrite.
 - Keep `vercel.json` and `vercel/vercel.local.json` in sync structurally when adding new routes.
 - Never hardcode environment-specific URLs in `vercel.json` — use `${VAR}` placeholders resolved via Infisical at deploy time.
 - `git.deploymentEnabled: false` in `vercel.json` — deployments are CI-driven, not triggered by Vercel's git integration.
+- `.gitignore` excludes `.vercel/`, `node_modules/`, and `.env*` files.
 
 ## Agent Workflow Rules
 
