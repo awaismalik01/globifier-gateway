@@ -26,7 +26,8 @@ export default function middleware(req: Request) {
     });
   }
 
-  const token = cookie.find((c) => c.startsWith("auth_token="))?.split("=")[1];
+  const tokenCookie = cookie.find((c) => c.startsWith("auth_token="));
+  const token = tokenCookie?.substring("auth_token=".length);
 
   if (!token) {
     return new Response("Access Denied", { status: 403 });
