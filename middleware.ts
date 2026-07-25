@@ -1,10 +1,11 @@
 import { next } from "@vercel/functions";
+import { jwtVerify } from "jose";
 
 export const config = {
   matcher: ["/api/:path*"],
 };
 
-export default function middleware(req: Request) {
+export default async function middleware(req: Request) {
   const url = new URL(req.url);
 
   const newHeaders = new Headers(req.headers);
@@ -31,6 +32,47 @@ export default function middleware(req: Request) {
 
   if (!token) {
     return new Response("Access Denied", { status: 403 });
+  }
+
+  // Verify the JWT signature and expiry
+  const secret = process.env.GLOBIFIER_JWT_SECRET;
+  if (!secret) {
+    return new Response("Server configuration error", { status: 500 });
+  }
+
+  try {
+    const encodedSecret = new TextEncoder().encode(secret);
+    await jwtVerify(token, encodedSecret, { algorithms: ["HS256"] });
+  } catch (error: unknown) {
+    const isExpired =
+      error instanceof Error && error.message.includes('"exp" claim');
+
+    if (isExpired) {
+      return new Response(
+        JSON.stringify({ message: "Token expired", code: "TOKEN_EXPIRED" }),
+        {
+          status: 401,
+          headers: {
+            "Content-Type": "application/json",
+            "Set-Cookie":
+              "auth_token=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0",
+          },
+        }
+      );
+    }
+
+    // Invalid signature or malformed token
+    return new Response(
+      JSON.stringify({ message: "Invalid token", code: "TOKEN_INVALID" }),
+      {
+        status: 401,
+        headers: {
+          "Content-Type": "application/json",
+          "Set-Cookie":
+            "auth_token=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0",
+        },
+      }
+    );
   }
 
   newHeaders.set("Authorization", `Bearer ${token}`);
