@@ -5,6 +5,7 @@ export const config = {
 };
 
 export default function middleware(req: Request) {
+  console.log("Hi");
   const url = new URL(req.url);
 
   const newHeaders = new Headers(req.headers);
