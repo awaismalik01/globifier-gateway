@@ -1,9 +1,9 @@
 {
   "scripts": {
-    "start": "cd vercel && vercel dev --yes --local-config vercel.local.json"
+    "start": "vercel dev --yes --local-config vercel/vercel.local.json"
   },
   "devDependencies": {
-    "vercel": "^43.2.0"
+    "vercel": "^57.0.0"
   },
   "dependencies": {
     "@vercel/functions": "^3.0.0"
