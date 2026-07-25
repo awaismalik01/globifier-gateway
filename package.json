@@ -3,9 +3,9 @@
     "start": "cd vercel && vercel dev --yes --local-config vercel.local.json"
   },
   "devDependencies": {
-    "vercel": "^57.0.0"
+    "vercel": "^43.2.0"
   },
   "dependencies": {
-    "@vercel/functions": "^3.7.6"
+    "@vercel/functions": "^3.0.0"
   }
 }

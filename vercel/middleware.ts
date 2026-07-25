@@ -5,7 +5,6 @@ export const config = {
 };
 
 export default function middleware(req: Request) {
-  console.log("Hi");
   const url = new URL(req.url);
 
   const newHeaders = new Headers(req.headers);
@@ -26,11 +25,9 @@ export default function middleware(req: Request) {
       request: { headers: newHeaders },
     });
   }
-  console.log(cookie);
+
   const tokenCookie = cookie.find((c) => c.startsWith("auth_token="));
-  console.log(tokenCookie);
   const token = tokenCookie?.substring("auth_token=".length);
-  console.log(token);
 
   if (!token) {
     return new Response("Access Denied", { status: 403 });
