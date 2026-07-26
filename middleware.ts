@@ -27,6 +27,15 @@ export default async function middleware(req: Request) {
     });
   }
 
+  if (
+    url.pathname === "/api/auth/forgot-password" ||
+    url.pathname === "/api/auth/reset-password"
+  ) {
+    return next({
+      request: { headers: newHeaders },
+    });
+  }
+
   const tokenCookie = cookie.find((c) => c.startsWith("auth_token="));
   const token = tokenCookie?.substring("auth_token=".length);
 

@@ -58,7 +58,11 @@ Located at the **project root** (required by Vercel's middleware convention). Ru
 Key behaviour:
 - **Strips** the `auth_token` cookie from all outgoing upstream requests — the upstream never sees it raw.
 - `/api/auth/login` is **exempt** — passes through without a token check.
+- `/api/auth/forgot-password` and `/api/auth/reset-password` are **exempt** — public password recovery endpoints.
 - All other `/api/*` routes require an `auth_token` cookie. If missing, returns `403 Access Denied`.
+- Verifies the JWT signature and expiry using `GLOBIFIER_JWT_SECRET` env var via `jose.jwtVerify()`.
+- Expired tokens return `401` with `TOKEN_EXPIRED` code and clear the cookie.
+- Invalid tokens return `401` with `TOKEN_INVALID` code and clear the cookie.
 - Extracts the token and forwards it as `Authorization: Bearer <token>` to the upstream service.
 
 When editing middleware:
