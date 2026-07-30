@@ -7,6 +7,10 @@
       "destination": "${GLOBIFIER_AUTH_BE_URL}/api/auth/:path*"
     },
     {
+      "source": "/api/forge/:path*",
+      "destination": "${GLOBIFIER_FORGE_BE_URL}/api/forge/:path*"
+    },
+    {
       "source": "/",
       "destination": "${GLOBIFIER_AUTH_FE_URL}/"
     },
