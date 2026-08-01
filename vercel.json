@@ -3,12 +3,16 @@
   "buildCommand": "",
   "rewrites": [
     {
-      "source": "/api/auth/:path*",
-      "destination": "${GLOBIFIER_AUTH_BE_URL}/api/auth/:path*"
-    },
-    {
       "source": "/api/forge/:path*",
       "destination": "${GLOBIFIER_FORGE_BE_URL}/api/forge/:path*"
+    },
+    {
+      "source": "/forge/:path*",
+      "destination": "${GLOBIFIER_FORGE_FE_URL}/forge/:path*"
+    },
+    {
+      "source": "/api/auth/:path*",
+      "destination": "${GLOBIFIER_AUTH_BE_URL}/api/auth/:path*"
     },
     {
       "source": "/",
