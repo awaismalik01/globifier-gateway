@@ -8,7 +8,7 @@
     },
     {
       "source": "/forge/:path*",
-      "destination": "${GLOBIFIER_FORGE_FE_URL}/forge/:path*"
+      "destination": "${GLOBIFIER_FORGE_FE_URL}/:path*"
     },
     {
       "source": "/api/auth/:path*",
