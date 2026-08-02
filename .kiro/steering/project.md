@@ -15,6 +15,8 @@ The gateway sits in front of these services:
 | `globifier-gateway` | Vercel edge gateway / reverse proxy | 3000 (vercel dev) |
 | `globifier-auth-be` | NestJS auth + user API | 8080 |
 | `globifier-auth-fe` | Frontend (Vite/React, separate repo) | 5173 |
+| `globifier-forge-be` | NestJS provisioning API | 8080 |
+| `globifier-forge-fe` | Forge frontend (Vite/React, separate repo) | 5174 |
 
 ## Repository Structure
 
@@ -40,6 +42,8 @@ Defined in `vercel.json` (deployed environments) and `vercel/vercel.local.json` 
 | Pattern | Destination |
 |---------|-------------|
 | `/api/auth/:path*` | `globifier-auth-be` |
+| `/api/forge/:path*` | `globifier-forge-be` |
+| `/forge/:path*` | `globifier-forge-fe` |
 | `/` | `globifier-auth-fe` |
 | `/:path*` | `globifier-auth-fe` (catch-all) |
 
