@@ -1,68 +1,127 @@
 # Globifier Gateway
 
-Edge reverse proxy for the Globifier platform. Routes traffic to backend and frontend services and enforces authentication at the Vercel edge.
+Edge reverse proxy for the Globifier platform. Routes all traffic to backend and frontend services, and enforces JWT authentication at the Vercel edge.
 
-## How It Works
+---
 
-- **Routing**: `vercel.json` defines URL rewrites that proxy requests to the appropriate upstream service.
-- **Auth enforcement**: Edge middleware (`vercel/middleware.ts`) intercepts all `/api/*` requests, extracts the `auth_token` cookie, and forwards it as a `Bearer` token to the backend. Unauthenticated requests (except `/api/auth/login`) receive a `403`.
+## What is Globifier?
 
-## Project Structure
+Globifier is an internal developer platform that automates end-to-end project setup and user management. Instead of manually creating repos, configuring deployments, provisioning databases, and wiring up secrets — Globifier does it all in one click.
+
+A single provisioning request creates:
+- A GitHub repository (from a template)
+- A Vercel project (linked and deployed)
+- A Neon PostgreSQL database (with DDL and DML roles)
+- An Infisical secrets project (with environment variables pre-populated)
+- GitHub Actions secrets (for CI/CD pipelines)
+- A notification email to the developer
+
+Beyond provisioning, Globifier provides:
+
+- **Globo Desk** — An admin console for managing users, roles, and NHID service clients across the platform. Create accounts, assign permissions, and generate machine-to-machine tokens from a single UI.
+- **Globo Forge** — Self-service project provisioning. Developers can spin up fully configured projects without waiting on ops or manual setup.
+- **Multi-service dashboard** — A unified interface that aggregates all Globifier services (Forge, Desk, Blogs, etc.) under one roof, with role-based visibility so admins and users each see what's relevant to them.
+
+The platform is designed around self-provisioning — teams can onboard services, manage access, and scale independently without bottlenecks.
+
+---
+
+## Gateway
+
+The gateway is the single entry point for all Globifier traffic. It runs at the Vercel edge and handles routing + authentication before requests reach any backend or frontend service.
 
 ```
-├── vercel.json                 # Routing config (env var placeholders, resolved at deploy time)
-├── vercel/
-│   ├── middleware.ts           # Edge middleware — auth token extraction
-│   └── vercel.local.json       # Local dev routing (hardcoded localhost URLs)
-├── .github/workflows/
-│   └── dev.yaml                # CI/CD — Infisical secrets → envsubst → Vercel deploy
-└── package.json                # Local dev: vercel CLI + start script
+                         ┌───────────────────────┐
+                         │   Globifier Gateway   │
+                         │   (Vercel Edge)       │
+                         └───────────┬───────────┘
+                                     │
+        ┌────────────────────────────┼────────────────────────────┐
+        │                            │                            │
+        ▼                            ▼                            ▼
+ Auth Backend (NestJS)      Forge Backend (NestJS)       Frontend SPAs (React)
+ /api/auth/*                /api/forge/*                 / and /forge/*
 ```
+
+---
+
+## Repositories
+
+| Repository | Description | Visibility |
+|------------|-------------|------------|
+| [globifier-gateway](https://github.com/awaismalik01/globifier-gateway) | Edge proxy + auth middleware (this repo) | Public |
+| `globifier-auth-be` | Authentication, user/role management, NHID service tokens | Private |
+| `globifier-auth-fe` | Login, account settings, dashboard | Private |
+| `globifier-forge-be` | Automated provisioning (GitHub, Vercel, Neon, Infisical, Brevo) | Private |
+| `globifier-forge-fe` | Provisioning UI, templates, status tracking | Private |
+| [github-actions](https://github.com/awaismalik01/github-actions) | Reusable CI/CD composite actions | Public |
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Gateway | Vercel Edge Functions, `jose` (JWT), `@vercel/functions` |
+| Backends | NestJS 11, TypeORM, PostgreSQL (Neon) |
+| Frontends | React 18, Vite 5, Tailwind CSS 3, React Router v6 |
+| Database | PostgreSQL on [Neon](https://neon.tech) |
+| Secrets | [Infisical](https://infisical.com) |
+| Email | [Brevo](https://brevo.com) |
+| Hosting | [Vercel](https://vercel.com) (all services) |
+| CI/CD | GitHub Actions |
+
+---
 
 ## Routing
 
-| Pattern | Upstream |
-|---------|----------|
-| `/api/auth/:path*` | Auth backend (NestJS) |
-| `/:path*` | Auth frontend (React) |
+| Pattern | Service |
+|---------|---------|
+| `/api/auth/:path*` | Auth Backend |
+| `/api/forge/:path*` | Forge Backend |
+| `/forge/:path*` | Forge Frontend |
+| `/` and `/:path*` | Auth Frontend |
 
-Upstream URLs are environment-specific:
-- **Local**: hardcoded in `vercel/vercel.local.json` (`localhost:8000`, `localhost:5173`)
-- **Deployed**: resolved from Infisical secrets (`GLOBIFIER_AUTH_BE_URL`, `GLOBIFIER_AUTH_FE_URL`) via `envsubst` in CI
+---
+
+## How Auth Works
+
+1. User logs in via `POST /api/auth/login` — backend sets an `auth_token` httpOnly cookie
+2. On subsequent requests, the gateway middleware extracts the cookie, verifies the JWT (HS256), and forwards it as `Authorization: Bearer` to the upstream service
+3. Exempt routes (login, forgot-password, reset-password) pass through without a token
+
+---
 
 ## Local Development
 
-Prerequisites: [Vercel CLI](https://vercel.com/docs/cli) installed and authenticated.
+Start the backend and frontend services first, then run the gateway:
 
 ```bash
-npm start
+npm install
+npm start        # runs vercel dev on port 3000
 ```
 
-This runs `vercel dev` with the local config. Start `globifier-auth-be` (port 8000) and `globifier-auth-fe` (port 5173) separately.
+| Service | Port |
+|---------|------|
+| Gateway | 3000 |
+| Auth Backend | 8080 |
+| Forge Backend | 8081 |
+| Auth Frontend | 5173 |
+| Forge Frontend | 5174 |
+
+---
 
 ## Deployment
 
-CI/CD is handled by `.github/workflows/dev.yaml`:
+Deployed to Vercel via GitHub Actions. The CI pipeline fetches secrets from Infisical, resolves URL placeholders in `vercel.json`, and deploys.
 
-1. Fetches secrets from Infisical (OIDC auth)
-2. Substitutes `${GLOBIFIER_AUTH_BE_URL}` and `${GLOBIFIER_AUTH_FE_URL}` in `vercel.json`
-3. Deploys to Vercel (preview)
+| Branch | Target |
+|--------|--------|
+| Any non-main | Vercel Preview |
+| `main` | Vercel Production |
 
-Triggered on push to any branch except `main`.
+---
 
-### Required GitHub Secrets
+## License
 
-| Secret | Description |
-|--------|-------------|
-| `INFISICAL_MACHINE_ID` | Infisical Machine Identity ID (OIDC) |
-| `INFISICAL_PROJECT_SLUG` | Infisical project slug |
-| `VERCEL_TOKEN` | Vercel API token |
-| `VERCEL_ORG_ID` | Vercel team/org ID |
-| `VERCEL_PROJECT_ID` | Vercel project ID |
-
-### Required Infisical Secrets
-
-| Key | Example |
-|-----|---------|
-| `GLOBIFIER_AUTH_BE_URL` | `https://globifier-auth-be-dev.vercel.app` |
-| `GLOBIFIER_AUTH_FE_URL` | `https://globifier-auth-fe-dev.vercel.app` |
+[Apache License 2.0](LICENSE)
