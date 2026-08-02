@@ -24,7 +24,7 @@ Beyond provisioning, Globifier provides:
 
 The platform is designed around self-provisioning — teams can onboard services, manage access, and scale independently without bottlenecks.
 
-<img width="1919" height="912" alt="image" src="https://github.com/user-attachments/assets/a773d77e-5384-4ce3-b6fb-110792fcedec" />
+![Globifier](Globifier.png)
 
 ---
 
