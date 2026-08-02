@@ -1,0 +1,25 @@
+{
+  "framework": null,
+  "buildCommand": "",
+  "rewrites": [
+    {
+      "source": "/api/auth/:path*",
+      "destination": "http://localhost:8080/api/auth/:path*"
+    },
+    {
+      "source": "/api/forge/:path*",
+      "destination": "http://localhost:8081/api/forge/:path*"
+    },
+    {
+      "source": "/",
+      "destination": "http://localhost:5173/"
+    },
+    {
+      "source": "/:path*",
+      "destination": "http://localhost:5173/:path*"
+    }
+  ],
+  "git": {
+    "deploymentEnabled": false
+  }
+}

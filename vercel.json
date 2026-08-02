@@ -1,0 +1,29 @@
+{
+  "framework": null,
+  "buildCommand": "",
+  "rewrites": [
+    {
+      "source": "/api/forge/:path*",
+      "destination": "${GLOBIFIER_FORGE_BE_URL}/api/forge/:path*"
+    },
+    {
+      "source": "/forge/:path*",
+      "destination": "${GLOBIFIER_FORGE_FE_URL}/:path*"
+    },
+    {
+      "source": "/api/auth/:path*",
+      "destination": "${GLOBIFIER_AUTH_BE_URL}/api/auth/:path*"
+    },
+    {
+      "source": "/",
+      "destination": "${GLOBIFIER_AUTH_FE_URL}/"
+    },
+    {
+      "source": "/:path*",
+      "destination": "${GLOBIFIER_AUTH_FE_URL}/:path*"
+    }
+  ],
+  "git": {
+    "deploymentEnabled": false
+  }
+}

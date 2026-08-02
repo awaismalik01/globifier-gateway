@@ -1,0 +1,30 @@
+name: Vercel Dev Deployment
+
+on:
+  push:
+    branches-ignore:
+      - main
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+  checks: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7.0.1
+
+      - uses: awaismalik01/github-actions/gateway-vercel-deploy@v1
+        with:
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel_project_id: ${{ secrets.VERCEL_PROJECT_ID }}
+          target: preview
+          infisical_identity_id: ${{ secrets.INFISICAL_MACHINE_ID }}
+          infisical_project_slug: ${{ secrets.INFISICAL_PROJECT_SLUG }}
+          infisical_env_slug: "dev"
