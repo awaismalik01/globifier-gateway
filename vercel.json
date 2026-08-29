@@ -3,6 +3,14 @@
   "buildCommand": "",
   "rewrites": [
     {
+      "source": "/api/desk/:path*",
+      "destination": "${GLOBIFIER_DESK_BE_URL}/api/desk/:path*"
+    },
+    {
+      "source": "/desk/:path*",
+      "destination": "${GLOBIFIER_DESK_FE_URL}/:path*"
+    },
+    {
       "source": "/api/forge/:path*",
       "destination": "${GLOBIFIER_FORGE_BE_URL}/api/forge/:path*"
     },
