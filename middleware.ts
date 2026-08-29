@@ -29,7 +29,8 @@ export default async function middleware(req: Request) {
 
   if (
     url.pathname === "/api/auth/forgot-password" ||
-    url.pathname === "/api/auth/reset-password"
+    url.pathname === "/api/auth/reset-password" ||
+    url.pathname === "/api/auth/nhid/token"
   ) {
     return next({
       request: { headers: newHeaders },
