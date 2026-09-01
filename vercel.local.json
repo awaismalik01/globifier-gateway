@@ -3,6 +3,14 @@
   "buildCommand": "",
   "rewrites": [
     {
+      "source": "/api/desk/:path*",
+      "destination": "${GLOBIFIER_DESK_BE_URL}/api/desk/:path*"
+    },
+    {
+      "source": "/desk/:path*",
+      "destination": "http://localhost:5175/:path*"
+    },
+    {
       "source": "/api/auth/:path*",
       "destination": "http://localhost:8080/api/auth/:path*"
     },
